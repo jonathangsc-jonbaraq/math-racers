@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Math Racers 🏎️</string>
+    <string name="title_activity_main">Math Racers</string>
+    <string name="package_name">com.jonbaraq.mathracers</string>
+    <string name="custom_url_scheme">com.jonbaraq.mathracers</string>
+</resources>

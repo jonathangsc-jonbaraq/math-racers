@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#090d16" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Math Racers" />
+  <title>🏎️ Math Racers</title>
+  <link rel="icon" type="image/png" href="assets/icon.png" />
+  <link rel="apple-touch-icon" href="assets/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- EFECTO PANTALLA ROJA DE DAÑO / PÉRDIDA DE VIDA -->
+  <div id="damage-overlay" class="damage-overlay" aria-hidden="true">
+    <div class="damage-center-alert" id="damage-alert-box">
+      <div class="damage-skull">💥💔</div>
+      <div class="damage-title" id="damage-title-text">-1 ❤️</div>
+      <div class="damage-correction" id="damage-correction-text">7 × 8 = 56</div>
+    </div>
+  </div>
+
+  <!-- VIÑETA ROJA PULSANTE CUANDO QUEDA POCA VIDA -->
+  <div id="low-hp-vignette" class="low-hp-vignette hidden" aria-hidden="true"></div>
+
+  <!-- EFECTO FLASH TURBO -->
+  <div id="turbo-overlay" class="turbo-overlay" aria-hidden="true"></div>
+
+  <!-- ================= PANTALLA 1: HOMEPAGE LIMPIA Y ESPACIOSA ================= -->
+  <section id="menu-screen" class="screen active">
+    <div class="menu-container">
+
+      <!-- 1. CABECERA CON ICONO DE LA APP -->
+      <header class="hero-header">
+        <div class="hero-brand">
+          <img src="assets/icon.png" alt="Math Racers" class="app-logo-img" onerror="this.style.display='none'" />
+          <div class="hero-title-wrap">
+            <h1 class="game-title">MATH <span>RACERS</span></h1>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <div class="trophies-pill">🏆 <span id="total-wins-badge">0</span></div>
+          <button id="btn-input-toggle" class="icon-circle-btn" onclick="cycleInputMode()" title="Cambiar modo de respuesta">🎯</button>
+          <button id="btn-sound" class="icon-circle-btn" onclick="toggleSound()" title="Sonido">🔊</button>
+        </div>
+      </header>
+
+      <!-- 2. TARJETA DE EDAD Y OPERACIONES -->
+      <div class="home-card">
+        <div class="age-pills" id="age-selector">
+          <button class="age-pill active" data-age="6" onclick="selectAgePreset('6')">
+            <span class="age-icon">👧</span>
+            <strong>6 Años</strong>
+          </button>
+          <button class="age-pill" data-age="9" onclick="selectAgePreset('9')">
+            <span class="age-icon">👦</span>
+            <strong>9 Años</strong>
+          </button>
+        </div>
+
+        <div class="ops-row" id="ops-pills">
+          <button class="op-pill active" data-op="add" onclick="toggleOperation('add')">
+            <span class="op-big">➕</span>
+          </button>
+          <button class="op-pill active" data-op="sub" onclick="toggleOperation('sub')">
+            <span class="op-big">➖</span>
+          </button>
+          <button class="op-pill" data-op="mul" onclick="toggleOperation('mul')">
+            <span class="op-big">✖️</span>
+          </button>
+          <button class="op-pill" data-op="div" onclick="toggleOperation('div')">
+            <span class="op-big">➗</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. ESCENARIO CENTRAL TÚ vs RIVAL (TOCA PARA CAMBIAR PERSONAJE) -->
+      <div class="home-card arena-card">
+        <div class="vs-showcase">
+          <!-- Tarjeta Jugador -->
+          <button class="showcase-fighter player-showcase" onclick="openCharacterModal('player')">
+            <span class="showcase-tag tag-p1">TÚ</span>
+            <div id="preview-player-svg" class="showcase-svg"></div>
+            <strong id="selected-player-name" class="showcase-name">Pikachu</strong>
+            <span class="change-hint">Cambiar 🔄</span>
+          </button>
+
+          <!-- Centro VS -->
+          <div class="vs-divider">
+            <div class="vs-circle">⚡VS⚡</div>
+          </div>
+
+          <!-- Tarjeta Rival -->
+          <button class="showcase-fighter rival-showcase" onclick="openCharacterModal('rival')">
+            <span class="showcase-tag tag-rival">RIVAL</span>
+            <div id="preview-rival-svg" class="showcase-svg"></div>
+            <strong id="selected-rival-name" class="showcase-name">Doraemon</strong>
+            <span class="change-hint">Cambiar 🔄</span>
+          </button>
+        </div>
+
+        <!-- Selector de Pista Compacto -->
+        <div id="track-pills" class="track-pills"></div>
+      </div>
+
+      <!-- 4. BOTONES DE JUEGO COMPACTOS Y PROPORCIONADOS -->
+      <div class="home-actions">
+        <button class="launch-btn launch-primary" onclick="startSingleRace()">
+          <span class="launch-icon">🏁</span>
+          <strong>¡ECHAR CARRERA!</strong>
+        </button>
+
+        <div class="secondary-modes-row">
+          <button class="launch-btn launch-cup launch-compact" onclick="startGrandPrix()">
+            <span class="launch-icon-sm">🏆</span>
+            <strong>Copa</strong>
+          </button>
+
+          <button class="launch-btn launch-2p launch-compact" onclick="openTwoPlayerSetup()">
+            <span class="launch-icon-sm">👧👦</span>
+            <strong>2 Jugadores</strong>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= MODAL: ELEGIR PERSONAJE ================= -->
+  <div id="character-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="char-modal-title">🏎️ Elige tu Personaje</h2>
+        <button class="close-btn" onclick="closeCharacterModal()">✕</button>
+      </div>
+      <div id="character-grid" class="character-grid"></div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: 2 JUGADORES (6 vs 9 AÑOS) ================= -->
+  <div id="two-player-modal" class="modal-overlay hidden">
+    <div class="modal-card wide-modal">
+      <div class="modal-header">
+        <h2>👧⚡👦 2 Jugadores</h2>
+        <button class="close-btn" onclick="closeTwoPlayerModal()">✕</button>
+      </div>
+
+      <div class="two-player-setup-grid">
+        <!-- Jugador 1 -->
+        <div class="p-setup-box p1-box">
+          <div class="p-box-top">
+            <strong>👈 Jugador 1</strong>
+            <select id="p1-age-select" class="styled-select">
+              <option value="6" selected>👧 6 Años (➕➖)</option>
+              <option value="9">👦 9 Años (➕➖✖️➗)</option>
+              <option value="mul">✖️ Tablas</option>
+            </select>
+          </div>
+          <div id="p1-char-mini-grid" class="mini-char-grid"></div>
+        </div>
+
+        <!-- Jugador 2 -->
+        <div class="p-setup-box p2-box">
+          <div class="p-box-top">
+            <strong>👉 Jugador 2</strong>
+            <select id="p2-age-select" class="styled-select">
+              <option value="6">👧 6 Años (➕➖)</option>
+              <option value="9" selected>👦 9 Años (➕➖✖️➗)</option>
+              <option value="mul">✖️ Tablas</option>
+            </select>
+          </div>
+          <div id="p2-char-mini-grid" class="mini-char-grid"></div>
+        </div>
+      </div>
+
+      <button class="launch-btn launch-primary full-width-btn" onclick="startTwoPlayerRace()">
+        🚦 ¡EMPEZAR!
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= PANTALLA 2: CARRERA ================= -->
+  <section id="race-screen" class="screen">
+    <!-- HUD COMPACTO DE 2 FILAS CON ESPACIO PARA BARRA SUPERIOR DEL OS -->
+    <header class="race-hud">
+      <div class="hud-top-row">
+        <!-- Jugador 1: Avatar + Corazones -->
+        <div class="hud-racer-pill p1-pill">
+          <div id="hud-p1-avatar" class="hud-avatar"></div>
+          <div class="hud-racer-info">
+            <div class="hud-name-line">
+              <span id="hud-p1-name" class="hud-racer-name">Pikachu</span>
+              <span id="hud-combo-badge" class="combo-badge hidden">🔥x2</span>
+            </div>
+            <div id="hud-p1-hearts" class="hearts-row"></div>
+            <div class="hp-bar-track">
+              <div id="hud-p1-hp-fill" class="hp-bar-fill" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Velocímetro Central -->
+        <div class="hud-center-badges">
+          <span id="race-mode-badge" class="race-cup-pill hidden">🏆 1/4</span>
+          <div class="speedometer-pill">
+            ⚡ <strong id="speed-kmh">60</strong> <small>km/h</small>
+          </div>
+        </div>
+
+        <!-- Rival / Jugador 2 + Salir -->
+        <div class="hud-racer-pill rival-pill">
+          <div id="hud-rival-avatar" class="hud-avatar"></div>
+          <div class="hud-racer-info">
+            <span id="hud-rival-name" class="hud-racer-name">Doraemon</span>
+            <div id="hud-p2-hearts" class="hearts-row hidden"></div>
+          </div>
+          <button class="hud-exit-btn" onclick="confirmExitRace()" title="Salir">✕</button>
+        </div>
+      </div>
+
+      <!-- Fila 2: Barra de Progreso hasta la Meta -->
+      <div class="minimap-track">
+        <span class="flag-icon">🟢</span>
+        <div class="minimap-rail">
+          <div id="minimap-fill-p1" class="minimap-fill-p1" style="width: 0%;"></div>
+          <div id="minimap-marker-rival" class="minimap-marker rival-marker" style="left: 2%;">
+            <span id="minimap-rival-icon">🔔</span>
+          </div>
+          <div id="minimap-marker-p1" class="minimap-marker p1-marker" style="left: 2%;">
+            <span id="minimap-p1-icon">⚡</span>
+          </div>
+        </div>
+        <span class="flag-icon">🏁</span>
+      </div>
+    </header>
+
+    <!-- PISTA ANIMADA (CANVAS) -->
+    <div class="track-viewport" id="track-viewport">
+      <canvas id="race-canvas"></canvas>
+
+      <!-- SEMÁFORO 3, 2, 1 -->
+      <div id="countdown-overlay" class="countdown-overlay hidden">
+        <div class="traffic-light">
+          <span id="light-red" class="t-bulb"></span>
+          <span id="light-yellow" class="t-bulb"></span>
+          <span id="light-green" class="t-bulb"></span>
+        </div>
+        <div id="countdown-number" class="countdown-number">3</div>
+      </div>
+
+      <!-- CARTEL CORTO DE TURBO -->
+      <div id="floating-race-banner" class="floating-race-banner hidden">⚡ ¡TURBO!</div>
+    </div>
+
+    <!-- PANEL DE OPERACIONES (1 JUGADOR) CON ESPACIO PARA CONTROLES INFERIORES DEL OS -->
+    <div id="cockpit-1p" class="math-cockpit">
+      <div class="question-panel">
+        <div class="turbo-bar-row">
+          <span class="turbo-bolt">⚡</span>
+          <div class="speed-timer-track">
+            <div id="speed-timer-fill" class="speed-timer-fill" style="width: 100%;"></div>
+          </div>
+          <button id="btn-visual-hint" class="hint-pill-btn" onclick="toggleVisualHint()" title="Ayuda visual">
+            💡
+          </button>
+        </div>
+
+        <div class="operation-display-box" id="operation-display-box">
+          <div id="math-equation-text" class="math-equation-text">6 + 4 = ?</div>
+        </div>
+
+        <div id="visual-hint-area" class="visual-hint-area hidden"></div>
+      </div>
+
+      <div class="answers-panel">
+        <div id="choices-container" class="choices-grid"></div>
+
+        <div id="keypad-container" class="keypad-wrapper hidden">
+          <div class="keypad-grid">
+            <button class="key-btn" onclick="pressKeypad('1')">1</button>
+            <button class="key-btn" onclick="pressKeypad('2')">2</button>
+            <button class="key-btn" onclick="pressKeypad('3')">3</button>
+            <button class="key-btn" onclick="pressKeypad('4')">4</button>
+            <button class="key-btn" onclick="pressKeypad('5')">5</button>
+            <button class="key-btn" onclick="pressKeypad('6')">6</button>
+            <button class="key-btn" onclick="pressKeypad('7')">7</button>
+            <button class="key-btn" onclick="pressKeypad('8')">8</button>
+            <button class="key-btn" onclick="pressKeypad('9')">9</button>
+            <button class="key-btn key-clear" onclick="pressKeypad('C')">⌫</button>
+            <button class="key-btn" onclick="pressKeypad('0')">0</button>
+            <button class="key-btn key-ok" onclick="pressKeypad('OK')">🚀</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL DIVIDIDO (2 JUGADORES) -->
+    <div id="cockpit-2p" class="math-cockpit-2p hidden">
+      <div class="p2p-side p1-side" id="p1-cockpit-box">
+        <div class="p2p-header">
+          <span id="p1-cockpit-title" class="p2p-title">👧 J1</span>
+          <span id="p1-cockpit-speed" class="p2p-speed">⚡ 60</span>
+        </div>
+        <div class="speed-timer-track mini-timer">
+          <div id="p1-timer-fill" class="speed-timer-fill" style="width: 100%;"></div>
+        </div>
+        <div id="p1-equation" class="p2p-equation">4 + 3 = ?</div>
+        <div id="p1-choices" class="p2p-choices-grid"></div>
+      </div>
+
+      <div class="p2p-side p2-side" id="p2-cockpit-box">
+        <div class="p2p-header">
+          <span id="p2-cockpit-title" class="p2p-title">👦 J2</span>
+          <span id="p2-cockpit-speed" class="p2p-speed">⚡ 60</span>
+        </div>
+        <div class="speed-timer-track mini-timer">
+          <div id="p2-timer-fill" class="speed-timer-fill" style="width: 100%;"></div>
+        </div>
+        <div id="p2-equation" class="p2p-equation">7 × 6 = ?</div>
+        <div id="p2-choices" class="p2p-choices-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MODAL DE FIN DE CARRERA ================= -->
+  <div id="result-modal" class="modal-overlay hidden">
+    <div class="modal-card result-modal-card">
+      <div id="result-trophy-banner" class="result-trophy-banner">🏆</div>
+      <h2 id="result-title" class="result-title">¡GANASTE!</h2>
+
+      <div id="result-podium-box" class="result-podium-box"></div>
+
+      <div class="stats-summary-grid">
+        <div class="stat-pill">
+          <span>✅</span>
+          <strong id="stat-correct">12</strong>
+        </div>
+        <div class="stat-pill">
+          <span>⏱️</span>
+          <strong id="stat-avg-time">2.1s</strong>
+        </div>
+        <div class="stat-pill">
+          <span>🚀</span>
+          <strong id="stat-top-speed">210</strong>
+        </div>
+        <div class="stat-pill">
+          <span>❤️</span>
+          <strong id="stat-hearts-left">4/5</strong>
+        </div>
+      </div>
+
+      <div id="mistakes-review-box" class="mistakes-review-box hidden">
+        <div id="mistakes-list" class="mistakes-list"></div>
+      </div>
+
+      <div class="result-actions">
+        <button id="btn-next-race" class="launch-btn launch-primary" onclick="handleNextRaceAction()">
+          🔄 ¡Otra!
+        </button>
+        <button class="launch-btn launch-secondary" onclick="backToMenu()">
+          🏠 Menú
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="characters.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
